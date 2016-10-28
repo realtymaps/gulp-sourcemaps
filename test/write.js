@@ -192,7 +192,7 @@ test('write: should write external map files', function(t) {
 
 test('write:clone - should keep original file history', function(t) {
     var file = makeFile();
-    var pipeline = sourcemaps.write('../maps', {destPath: 'dist'});
+    var pipeline = sourcemaps.write('../maps', {destPath: 'dist', clone: true});
     var outFiles = [];
     var fileCount = 0;
     pipeline
@@ -612,10 +612,14 @@ test('write: should work with rev plugin', function(t) {
   var pipeline = _rev.pipe(sourcemaps.write('../maps', {destPath: 'dist'}));
   pipeline.on('data', function(file) {
     if(path.extname(file.path) === '.map'){
-      console.log("@@@@@@@@@@@@ revOrigPath @@@@@@@@@@@@")
-      console.log("path: " + file.path)
-      console.log("revOrigPath: " + file.revOrigPath)
-      t.ok(path.extname(file.path) === path.extname(file.revOrigPath), 'Have correct origin path');
+      console.log("@@@@@@@@@@@@ revOrigPath @@@@@@@@@@@@");
+      console.log("path: " + file.path);
+      console.log("revOrigPath: " + file.revOrigPath);
+      if(file.revOrigPath){
+        t.ok(path.extname(file.path) === path.extname(file.revOrigPath), 'Have correct origin path');
+      } else {
+        t.ok('Not conflict revOrigPath with source file');
+      }
       t.end();
     }
   }).on('error', function() {
