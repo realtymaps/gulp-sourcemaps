@@ -8,6 +8,8 @@ var path = require('path');
 var fs = require('fs');
 var hookStd = require('hook-std');
 var debug = require('debug-fabulous')();
+var rev = require('gulp-rev');
+var path = require('path');
 
 var sourceContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.js')).toString();
 
@@ -190,7 +192,7 @@ test('write: should write external map files', function(t) {
 
 test('write:clone - should keep original file history', function(t) {
     var file = makeFile();
-    var pipeline = sourcemaps.write('../maps', {destPath: 'dist'});
+    var pipeline = sourcemaps.write('../maps', {destPath: 'dist', clone: true});
     var outFiles = [];
     var fileCount = 0;
     pipeline
@@ -601,4 +603,28 @@ test('write: should output an error message if debug option is set and sourceCon
     t.ok(history[2].match(/source file not found: /), 'should warn about missing file');
     t.end();
   }).write(file);
+});
+
+test('write: should work with rev plugin', function(t) {
+  var file = makeFile();
+  var _rev = rev();
+  // var pipeline = _rev.pipe(sourcemaps.write('../maps', {destPath: 'dist', clone:{deep:false}}));
+  var pipeline = _rev.pipe(sourcemaps.write('../maps', {destPath: 'dist'}));
+  pipeline.on('data', function(file) {
+    if(path.extname(file.path) === '.map'){
+      console.log("@@@@@@@@@@@@ revOrigPath @@@@@@@@@@@@");
+      console.log("path: " + file.path);
+      console.log("revOrigPath: " + file.revOrigPath);
+      if(file.revOrigPath){
+        t.ok(path.extname(file.path) === path.extname(file.revOrigPath), 'Have correct origin path');
+      } else {
+        t.ok('Not conflict revOrigPath with source file');
+      }
+      t.end();
+    }
+  }).on('error', function() {
+    t.fail('emitted error');
+    t.end();
+  });
+  _rev.write(file);
 });
