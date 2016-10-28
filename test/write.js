@@ -608,9 +608,13 @@ test('write: should output an error message if debug option is set and sourceCon
 test('write: should work with rev plugin', function(t) {
   var file = makeFile();
   var _rev = rev();
+  // var pipeline = _rev.pipe(sourcemaps.write('../maps', {destPath: 'dist', clone:{deep:false}}));
   var pipeline = _rev.pipe(sourcemaps.write('../maps', {destPath: 'dist'}));
   pipeline.on('data', function(file) {
     if(path.extname(file.path) === '.map'){
+      console.log("@@@@@@@@@@@@ revOrigPath @@@@@@@@@@@@")
+      console.log("path: " + file.path)
+      console.log("revOrigPath: " + file.revOrigPath)
       t.ok(path.extname(file.path) === path.extname(file.revOrigPath), 'Have correct origin path');
       t.end();
     }
